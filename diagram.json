@@ -1,0 +1,125 @@
+{
+    "version": 1,
+    "author": "Uri Shaked",
+    "editor": "wokwi",
+    "parts": [
+        {
+            "type": "wokwi-arduino-uno",
+            "id": "uno",
+            "top": 183,
+            "left": 18.6,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-neopixel-canvas",
+            "id": "neopixels-matrix",
+            "top": -59.2,
+            "left": 232.3,
+            "rotate": 180,
+            "attrs": {
+                "rows": "8",
+                "cols": "8",
+                "pixelate": "circle",
+                "matrixLayout": "serpentine",
+                "matrixBrightness": "3.5"
+            }
+        },
+        {
+            "type": "wokwi-led",
+            "id": "led-test",
+            "top": 40.0,
+            "left": 71,
+            "attrs": {
+                "color": "#f0f"
+            }
+        },
+        {
+            "type": "wokwi-pushbutton",
+            "id": "btn-test",
+            "top": -20.0,
+            "left": 57.6,
+            "attrs": {
+                "color": "#f0f",
+                "key": "5",
+                "label": "5"
+            }
+        }
+    ],
+    "connections": [
+        [
+            "uno:7",
+            "led-test:A",
+            "blue",
+            [
+                "v-16",
+                "*",
+                "h6"
+            ]
+        ],
+        [
+            "uno:GND.1",
+            "led-test:C",
+            "black",
+            [
+                "v-12",
+                "*",
+                "h-8",
+                "v4"
+            ]
+        ],
+        [
+            "uno:6",
+            "btn-test:2.r",
+            "yellow",
+            [
+                "v-36",
+                "*",
+                "h10"
+            ]
+        ],
+        [
+            "uno:GND.1",
+            "btn-test:1.l",
+            "black",
+            [
+                "v-25",
+                "*",
+                "h-6"
+            ]
+        ],
+        [
+            "uno:GND.1",
+            "neopixels-matrix:VSS",
+            "black",
+            [
+                "v-25.0",
+                "h00.0"
+            ]
+        ],
+        [
+            "uno:5V",
+            "neopixels-matrix:VDD",
+            "red",
+            [
+                "v20.0",
+                "h250.0",
+                "*",
+                "h120.0",
+                "v-20.0"
+            ]
+        ],
+        [
+            "uno:5",
+            "neopixels-matrix:DIN",
+            "green",
+            [
+                "v-15.0",
+                "h100.0",
+                "*",
+                "h150.0",
+                "v-30.0"
+            ]
+        ]
+    ],
+    "dependencies": {}
+}
