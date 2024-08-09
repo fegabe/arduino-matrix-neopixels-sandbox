@@ -47,7 +47,7 @@
     ],
     "connections": [
         [
-            "uno:7",
+            "uno:11",
             "led-test:A",
             "blue",
             [
@@ -68,7 +68,7 @@
             ]
         ],
         [
-            "uno:6",
+            "uno:12",
             "btn-test:2.r",
             "yellow",
             [
@@ -109,7 +109,7 @@
             ]
         ],
         [
-            "uno:5",
+            "uno:10",
             "neopixels-matrix:DIN",
             "green",
             [

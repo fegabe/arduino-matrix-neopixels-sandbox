@@ -4,19 +4,47 @@
 // #define SERIAL_BAUD 115200
 #define SERIAL_BAUD 9600
 
-#pragma region MATRIX
+#pragma region GAMEPAD
 
-#define NUM_LEDS (8 * 8)
-const uint8_t brightness = 255 / 1;
-#define BRIGHTNESS 64
+// Digital inputs, connected to push buttons
+const byte PIN_BUTTON_A = 2;
+const byte PIN_BUTTON_B = 3;
+const byte PIN_BUTTON_C = 4;
+const byte PIN_BUTTON_D = 5;
+const byte PIN_BUTTON_E = 6;
+const byte PIN_BUTTON_F = 7;
+const byte PIN_BUTTON_K = 8;
+
+// X Coordinate is queried via analog port Min:0 / Max: 1023
+// A nalog Inputs, connected to the joystiyck coordinate is queried // via analog port 0 Min:0 / Max: 102 3 const byte
+const byte PIN_ANALOG_X = 0;
+const byte PIN_ANALOG_Y = 1;
+byte ButtonStatus = 0;
+byte ButtonOLDStatus = 0;
+byte JoystickButtonStatus = 1;
+byte JoystickButtonOLDStatus = 1;
+int XCoord = 0;
+int XOLDCoord = 0;
+int YCoord = 0;
+int YOLDCoord = 0;
+
+#pragma endregion
+
+const uint8_t blinkLedPin = 11;
+const uint8_t blinkButtonPin = 12;
+
+#pragma region MATRIX
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
-#define DATA_PIN 5
+#define MATRIX_DATA_PIN 10
 #define CLOCK_PIN 13
 
+#define NUM_LEDS (8 * 8)
+#define GLOBAL_BRIGHTNESS_SCALING 64
+const uint8_t brightness = 255 / 4;
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
@@ -32,18 +60,13 @@ int fallingDirection = -1;
 
 #pragma endregion
 
-const uint8_t ledPins[] = {9, 10, 11, 12};
-const uint8_t buttonPins[] = {2, 3, 4, 5};
-
-const uint8_t blinkLedPin = 7;
-const uint8_t blinkButtonPin = 6;
-
 // variables will change:
 int buttonState = 0; // variable for reading the pushbutton status
 int currentMillis = 0;
 int millisDelay = 4000;
 int blinkOn = 0;
 
+void readGamepad();
 void changePalettePeriodically();
 void fillLEDsFromPaletteColors(bool isPressed, uint8_t startColorIndex);
 void ledWrapper(bool on);
@@ -51,25 +74,35 @@ bool readButton();
 
 void setup()
 {
+    Serial.begin(SERIAL_BAUD);
+
+    // pinMode(PIN_BUTTON_A, INPUT_PULLUP);
+    // pinMode(PIN_BUTTON_B, INPUT_PULLUP);
+    // pinMode(PIN_BUTTON_C, INPUT_PULLUP);
+    // pinMode(PIN_BUTTON_D, INPUT_PULLUP);
+    // pinMode(PIN_BUTTON_E, INPUT_PULLUP);
+    // pinMode(PIN_BUTTON_F, INPUT_PULLUP);
+    // pinMode(PIN_BUTTON_K, INPUT_PULLUP);
+
     // initialize LED digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(ledPins[3], OUTPUT);
     pinMode(blinkLedPin, OUTPUT);
     pinMode(blinkButtonPin, INPUT_PULLUP);
 
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS); // GRB ordering is assumed
-    FastLED.setBrightness(BRIGHTNESS);
+    FastLED.addLeds<NEOPIXEL, MATRIX_DATA_PIN>(leds, NUM_LEDS); // GRB ordering is assumed
+    FastLED.setBrightness(GLOBAL_BRIGHTNESS_SCALING);
 
     currentPalette = RainbowColors_p;
     currentBlending = LINEARBLEND;
 
-    Serial.begin(SERIAL_BAUD);
-    delay(500);
+    // delay(500);
     Serial.println("Inicializando...\n\n");
 }
 
 void loop()
 {
+    // readGamepad();
+
     if (currentMillis >= millisDelay)
     {
         currentMillis = 0;
@@ -106,12 +139,12 @@ void loop()
             mappedFallingPixel = map(fallingPixelIndex, 0, 8, NUM_LEDS - 1, NUM_LEDS - 9);
         }
         leds[mappedFallingPixel] = CRGB::Red;
-        Serial.println("fallingIdx: " + String(fallingPixelIndex) + " VS mappedIdx: " + String(mappedFallingPixel));
+        // Serial.println("fallingIdx: " + String(fallingPixelIndex) + " VS mappedIdx: " + String(mappedFallingPixel));
         fallingPixelIndex = ++fallingPixelIndex % 8;
         if (fallingPixelIndex == 0)
         {
             fallingDirection = -fallingDirection;
-            Serial.println("change direction! " + String(fallingDirection));
+            // Serial.println("change direction! " + String(fallingDirection));
         }
     }
 
@@ -123,10 +156,44 @@ void loop()
     // delay(1);
 }
 
+void readGamepad()
+{
+    ButtonStatus = PIND & 0b11111100;
+    // Pin 2 is configured to input with pullup
+    // Pin 3 is configured to input with pullup
+    // Pin 4 is configured to input with pullup
+    // Pin 5 is configured to input with pullup
+    // Pin 6 is configured to input with pullup
+    // Pin 7 is configured to input with pullup
+    // Pin 8 is configured to input with pullup
+    // Reading of inputs 2-7 directly via PortD
+    // A bitwise AND mask prevents the reading of
+    // pins 0 and 1 (serial interface)
+    JoystickButtonStatus = digitalRead(PIN_BUTTON_K);
+    XCoord = analogRead(PIN_ANALOG_X);
+    YCoord = analogRead(PIN_ANALOG_Y);
+    if ((ButtonStatus != ButtonOLDStatus) || (XCoord != XOLDCoord) ||
+        (YCoord != YOLDCoord) || (JoystickButtonStatus != JoystickButtonOLDStatus))
+    {
+        delay(100); // Button debounce
+        ButtonOLDStatus = ButtonStatus;
+        JoystickButtonOLDStatus = JoystickButtonStatus;
+        XOLDCoord = XCoord;
+        YOLDCoord = YCoord;
+        Serial.print("Taster: ");
+        Serial.print(ButtonStatus, BIN);
+        Serial.print(" JoystickTaster: ");
+        Serial.print(JoystickButtonStatus, BIN);
+        Serial.print(" Position X:");
+        Serial.print(XCoord);
+        Serial.print("Y: ");
+        Serial.println(YCoord);
+    }
+}
+
 void ledWrapper(bool on)
 {
     digitalWrite(LED_BUILTIN, on ? HIGH : LOW);
-    digitalWrite(ledPins[3], on ? HIGH : LOW);
     // digitalWrite(blinkLedPin, on ? HIGH : LOW);
     // digitalWrite(blinkLedPin, !on ? HIGH : LOW);
 }
