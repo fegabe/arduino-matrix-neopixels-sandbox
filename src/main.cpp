@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+#include "Button.h"
+
 // #define SERIAL_BAUD 115200
 #define SERIAL_BAUD 9600
 
@@ -10,20 +12,10 @@
 // (Y)  (A)
 //    (B)
 
-// Digital inputs, connected to push buttons
-const byte PIN_BUTTON_X = 2;
-const byte PIN_BUTTON_X_BYTE = 0b00000100;
-const byte PIN_BUTTON_A = 3;
-const byte PIN_BUTTON_A_BYTE = 0b00001000;
-const byte PIN_BUTTON_B = 4;
-const byte PIN_BUTTON_B_BYTE = 0b00010000;
-const byte PIN_BUTTON_Y = 5;
-const byte PIN_BUTTON_Y_BYTE = 0b00100000;
-const byte PIN_BUTTON_E = 6;
-const byte PIN_BUTTON_E_BYTE = 0b01000000;
-const byte PIN_BUTTON_F = 7;
-const byte PIN_BUTTON_K_BYTE = 0b10000000;
-const byte PIN_BUTTON_K = 8;
+Button button_Y{PIN5};
+Button button_X{PIN2};
+Button button_A{PIN3};
+Button button_B{PIN4};
 
 // X Coordinate is queried via analog port Min:0 / Max: 1023
 // A nalog Inputs, connected to the joystiyck coordinate is queried // via analog port 0 Min:0 / Max: 102 3 const byte
@@ -88,13 +80,10 @@ void setup()
 {
     Serial.begin(SERIAL_BAUD);
 
-    pinMode(PIN_BUTTON_X, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_A, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_B, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_Y, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_E, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_F, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_K, INPUT_PULLUP);
+    button_X.begin();
+    button_Y.begin();
+    button_A.begin();
+    button_B.begin();
 
     // initialize LED digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
@@ -127,7 +116,7 @@ void loop()
     buttonState = digitalRead(blinkButtonPin);
     // bool isPressed = buttonState == LOW;
     // bool isPressed = buttonState == HIGH;
-    bool isPressed = isButtonPressed(PIN_BUTTON_B_BYTE);
+    bool isPressed = button_B.wasPressed();
     digitalWrite(blinkLedPin, isPressed ? HIGH : LOW);
     // digitalWrite(LED_BUILTIN, isPressed ? HIGH : LOW);
 
@@ -169,70 +158,26 @@ void loop()
     // delay(1);
 }
 
-bool isButtonPressed(byte button)
-{
-    return (ButtonStatus & button) == 0;
-}
-
 void readGamepad()
 {
-    ButtonStatus = PIND & 0b11111100;
-    // Pin 2 is configured to input with pullup
-    // Pin 3 is configured to input with pullup
-    // Pin 4 is configured to input with pullup
-    // Pin 5 is configured to input with pullup
-    // Pin 6 is configured to input with pullup
-    // Pin 7 is configured to input with pullup
-    // Pin 8 is configured to input with pullup
-    // Reading of inputs 2-7 directly via PortD
-    // A bitwise AND mask prevents the reading of
-    // pins 0 and 1 (serial interface)
-    JoystickButtonStatus = digitalRead(PIN_BUTTON_K);
-    XCoord = analogRead(PIN_ANALOG_X);
-    YCoord = analogRead(PIN_ANALOG_Y);
-    if ((ButtonStatus != ButtonOLDStatus) || (XCoord != XOLDCoord) ||
-        (YCoord != YOLDCoord) || (JoystickButtonStatus != JoystickButtonOLDStatus))
+    if (button_X.wasPressed())
     {
-        // delay(100); // Button debounce
-        ButtonOLDStatus = ButtonStatus;
-        JoystickButtonOLDStatus = JoystickButtonStatus;
-        XOLDCoord = XCoord;
-        YOLDCoord = YCoord;
-        // Serial.print("Taster: ");
-        // Serial.print(ButtonStatus, BIN);
-        // Serial.print(" JoystickTaster: ");
-        // Serial.print(JoystickButtonStatus, BIN);
-        // Serial.print(" Position X:");
-        // Serial.print(XCoord);
-        // Serial.print("Y: ");
-        // Serial.println(YCoord);
-
-        Serial.println("XCoord,YCoord: " + String(XCoord) + "," + String(YCoord));
-
-        // convert XY to a value between -1 and 1, rounding to closest values, not using map
-        float y = ((YCoord - 512.0) / 512.0); // roundf
-        float x = ((XCoord - 512.0) / 512.0); // roundf
-
-        Serial.println("X,Y: " + String(x) + "," + String(y));
-
-        if (isButtonPressed(PIN_BUTTON_X_BYTE))
-        {
-            Serial.println("Button X pressed");
-        }
-        if (isButtonPressed(PIN_BUTTON_A_BYTE))
-        {
-            Serial.println("Button A pressed");
-        }
-        if (isButtonPressed(PIN_BUTTON_B_BYTE))
-        {
-            Serial.println("Button B pressed");
-        }
-        if (isButtonPressed(PIN_BUTTON_Y_BYTE))
-        {
-            Serial.println("Button Y pressed");
-        }
+        Serial.println(F("Button [X] pressed"));
+    }
+    if (button_Y.wasPressed())
+    {
+        Serial.println(F("Button [Y] pressed"));
+    }
+    if (button_A.wasPressed())
+    {
+        Serial.println(F("Button [A] pressed"));
+    }
+    if (button_B.wasPressed())
+    {
+        Serial.println(F("Button [B] pressed"));
     }
 }
+
 void ledWrapper(bool on)
 {
     digitalWrite(LED_BUILTIN, on ? HIGH : LOW);
@@ -250,7 +195,7 @@ void fillLEDsFromPaletteColors(bool isPressed, uint8_t startColorIndex)
 
 bool readButton()
 {
-    delay(1);
+    // delay(1);
     return digitalRead(blinkButtonPin) == LOW;
 }
 

@@ -43,6 +43,42 @@
                 "key": "5",
                 "label": "5"
             }
+        },
+        {
+            "type": "wokwi-pushbutton",
+            "id": "btn_x",
+            "top": 250,
+            "left": 500,
+            "attrs": {
+                "color": "yellow"
+            }
+        },
+        {
+            "type": "wokwi-pushbutton",
+            "id": "btn_y",
+            "top": 300,
+            "left": 450,
+            "attrs": {
+                "color": "blue"
+            }
+        },
+        {
+            "type": "wokwi-pushbutton",
+            "id": "btn_a",
+            "top": 300,
+            "left": 550,
+            "attrs": {
+                "color": "blue"
+            }
+        },
+        {
+            "type": "wokwi-pushbutton",
+            "id": "btn_b",
+            "top": 350,
+            "left": 500,
+            "attrs": {
+                "color": "yellow"
+            }
         }
     ],
     "connections": [
@@ -85,6 +121,78 @@
                 "v-25",
                 "*",
                 "h-6"
+            ]
+        ],
+        [
+            "btn_x:1.l",
+            "uno:GND.2",
+            "black",
+            [
+                "h-1.88",
+                "h100.4"
+            ]
+        ],
+        [
+            "btn_x:2.r",
+            "uno:2",
+            "yellow",
+            [
+                "h56.62",
+                "h14.34"
+            ]
+        ],
+        [
+            "btn_y:1.l",
+            "uno:GND.2",
+            "black",
+            [
+                "h-1.88",
+                "h100.4"
+            ]
+        ],
+        [
+            "btn_y:2.r",
+            "uno:5",
+            "blue",
+            [
+                "h56.62",
+                "h14.34"
+            ]
+        ],
+        [
+            "btn_a:1.l",
+            "uno:GND.2",
+            "black",
+            [
+                "h-1.88",
+                "h100.4"
+            ]
+        ],
+        [
+            "btn_a:2.r",
+            "uno:3",
+            "blue",
+            [
+                "h56.62",
+                "h14.34"
+            ]
+        ],
+        [
+            "btn_b:1.l",
+            "uno:GND.2",
+            "black",
+            [
+                "h-1.88",
+                "h100.4"
+            ]
+        ],
+        [
+            "btn_b:2.r",
+            "uno:4",
+            "yellow",
+            [
+                "h56.62",
+                "h14.34"
             ]
         ],
         [
